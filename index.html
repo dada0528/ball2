@@ -1,14 +1,18 @@
 <!DOCTYPE html>
 <html lang="zh-TW">
+
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>羽球排點大師 | Badminton Matchmaker</title>
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;600;800&family=Noto+Sans+TC:wght@400;700&display=swap" rel="stylesheet">
+    <link
+        href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;600;800&family=Noto+Sans+TC:wght@400;700&display=swap"
+        rel="stylesheet">
     <link rel="stylesheet" href="style.css">
 </head>
+
 <body>
     <div class="app-container">
         <header class="main-header">
@@ -23,7 +27,7 @@
             <!-- Left Panel: Controls & Input -->
             <section class="control-panel glass-panel">
                 <h2><span class="section-icon">📝</span> 選手管理</h2>
-                
+
                 <div class="input-group">
                     <h3>單一新增</h3>
                     <div class="manual-input">
@@ -35,8 +39,9 @@
 
                 <div class="input-group">
                     <h3>批量匯入</h3>
-                    <p class="hint">格式：姓名 等級 (例如：小明 8, 大華 6)</p>
-                    <textarea id="bulkInput" placeholder="在此貼上名單...&#10;小明 7&#10;小華 5&#10;John 8"></textarea>
+                    <p class="hint">格式：編號(選填) 姓名 等級 (例如：01. 小明 8)</p>
+                    <textarea id="bulkInput"
+                        placeholder="在此貼上名單...&#10;01. 小明 7&#10;02 昆達 5&#10;John 8 (晚到)"></textarea>
                     <button id="parseBtn" class="btn secondary-btn">解析並匯入</button>
                 </div>
 
@@ -88,4 +93,5 @@
 
     <script src="script.js"></script>
 </body>
+
 </html>

@@ -59,20 +59,29 @@ function parseBulkInput() {
         line = line.trim();
         if (!line) return;
 
-        // Regex to match "Name Level" or just "Name"
-        // Supports: "Name 8", "Name, 8", "Name", "Name8"
-        // Captures: Group 1 (Name), Group 2 (Level - optional)
-        const match = line.match(/^([^\d,]+)[,\s]*(\d+)?$/);
+        // Strategy: Try to match "Name Level" first. If that fails, assume just "Name".
+
+        // 1. Try to match: ID(opt) Name Level Extra(opt)
+        // Regex: Start, ID(opt), Name(Greedy), Space, Level, Extra(opt)
+        let match = line.match(/^(?:(\d+)[\.\s]*)?\s*(.+)\s+(\d+).*$/);
+
+        let name, level;
 
         if (match) {
-            const name = match[1].trim();
-            // Default level 5 if not specified
-            const level = match[2] ? parseInt(match[2]) : 5; 
-            
-            if (name) {
-                addPlayerToState(name, level);
-                addedCount++;
+            name = match[2].trim();
+            level = parseInt(match[3]);
+        } else {
+            // 2. Fallback: ID(opt) Name
+            match = line.match(/^(?:(\d+)[\.\s]*)?\s*(.+).*$/);
+            if (match) {
+                name = match[2].trim();
+                level = 5; // Default level
             }
+        }
+
+        if (name) {
+            addPlayerToState(name, level);
+            addedCount++;
         }
     });
 
@@ -139,91 +148,7 @@ function renderPlayers() {
     });
 }
 
-function generateMatches() {
-    if (players.length < 4) {
-        alert('至少需要 4 位選手才能開始比賽！');
-        return;
-    }
-
-    // Sort by level descending (Strongest first)
-    // Add a small random factor to shuffle players with same level
-    const sortedPlayers = [...players].sort((a, b) => {
-        if (a.level !== b.level) return b.level - a.level;
-        return Math.random() - 0.5;
-    });
-
-    const matches = [];
-    const playersPerMatch = 4;
-    const maxMatches = Math.min(courtCount, Math.floor(sortedPlayers.length / playersPerMatch));
-
-    // Take the top N*4 players for the matches
-    const activePlayers = sortedPlayers.slice(0, maxMatches * playersPerMatch);
-    const waitingPlayers = sortedPlayers.slice(maxMatches * playersPerMatch);
-
-    matchContainer.innerHTML = '';
-
-    if (maxMatches === 0) {
-        matchContainer.innerHTML = '<div class="empty-state">人數不足以湊成一場比賽</div>';
-        return;
-    }
-
-    // Create matches
-    for (let i = 0; i < maxMatches; i++) {
-        // Get 4 players for this court
-        // Strategy: To balance, we can take 4 players with similar skill levels (competitive)
-        // OR take 1 strong, 1 weak, etc.
-        // Here we take chunks of 4 from the sorted list (similar skill levels play together)
-        // This usually makes for better games than mixing Lv10 with Lv1.
-        
-        const group = activePlayers.slice(i * 4, (i + 1) * 4);
-        
-        // Within this group of 4 similar level players, we balance them.
-        // Sort this small group by level again to be sure
-        group.sort((a, b) => b.level - a.level);
-        
-        // P1 (Strongest), P2, P3, P4 (Weakest)
-        // Team A: P1 + P4
-        // Team B: P2 + P3
-        const teamA = [group[0], group[3]];
-        const teamB = [group[1], group[2]];
-
-        const matchEl = document.createElement('div');
-        matchEl.className = 'court-card';
-        matchEl.style.animationDelay = `${i * 0.1}s`;
-        matchEl.innerHTML = `
-            <div class="court-header">
-                <span class="court-title">第 ${i + 1} 場地</span>
-                <span style="font-size: 0.8rem; color: var(--text-muted)">均等: ${((group.reduce((acc, p) => acc + p.level, 0)) / 4).toFixed(1)}</span>
-            </div>
-            <div class="match-vs">
-                <div class="team">
-                    <div class="team-player">${teamA[0].name} <span style="font-size:0.8em; opacity:0.7">(${teamA[0].level})</span></div>
-                    <div class="team-player">${teamA[1].name} <span style="font-size:0.8em; opacity:0.7">(${teamA[1].level})</span></div>
-                </div>
-                <div class="vs-badge">VS</div>
-                <div class="team">
-                    <div class="team-player">${teamB[0].name} <span style="font-size:0.8em; opacity:0.7">(${teamB[0].level})</span></div>
-                    <div class="team-player">${teamB[1].name} <span style="font-size:0.8em; opacity:0.7">(${teamB[1].level})</span></div>
-                </div>
-            </div>
-        `;
-        matchContainer.appendChild(matchEl);
-    }
-
-    // Show waiting players if any
-    if (waitingPlayers.length > 0) {
-        const waitingEl = document.createElement('div');
-        waitingEl.style.padding = '1rem';
-        waitingEl.style.color = 'var(--text-muted)';
-        waitingEl.style.textAlign = 'center';
-        waitingEl.innerHTML = `<strong>候補/休息：</strong> ${waitingPlayers.map(p => p.name).join(', ')}`;
-        matchContainer.appendChild(waitingEl);
-    }
-}
-
-// Local Storage Helper
-function saveToStorage() {
-    localStorage.setItem('badminton_players', JSON.stringify(players));
+localStorage.setItem('badminton_players', JSON.stringify(players));
 }
 
 function loadFromStorage() {
