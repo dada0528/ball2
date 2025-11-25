@@ -148,7 +148,90 @@ function renderPlayers() {
     });
 }
 
-localStorage.setItem('badminton_players', JSON.stringify(players));
+function generateMatches() {
+    if (players.length < 4) {
+        alert('至少需要 4 位選手才能開始比賽！');
+        return;
+    }
+
+    // Sort by "Effective Level" to add variety while keeping balance
+    // Effective Level = Real Level + Random Noise (-1.5 to +1.5)
+    const sortedPlayers = [...players].sort((a, b) => {
+        const noiseA = (Math.random() * 3) - 1.5;
+        const noiseB = (Math.random() * 3) - 1.5;
+        const levelA = a.level + noiseA;
+        const levelB = b.level + noiseB;
+        return levelB - levelA;
+    });
+
+    matchContainer.innerHTML = '';
+
+    const playersPerMatch = 4;
+    const totalMatches = Math.floor(sortedPlayers.length / playersPerMatch);
+
+    if (totalMatches === 0) {
+        matchContainer.innerHTML = '<div class="empty-state">人數不足以湊成一場比賽</div>';
+        return;
+    }
+
+    // Create ALL matches
+    for (let i = 0; i < totalMatches; i++) {
+        const group = sortedPlayers.slice(i * 4, (i + 1) * 4);
+
+        // Balance within the group: Strongest + Weakest vs Middle Two
+        group.sort((a, b) => b.level - a.level);
+        const teamA = [group[0], group[3]];
+        const teamB = [group[1], group[2]];
+
+        // Determine if this match is on a court or waiting
+        const isCourt = i < courtCount;
+        const matchTitle = isCourt ? `第 ${i + 1} 場地` : `候補對戰 ${i - courtCount + 1}`;
+        const cardClass = isCourt ? 'court-card' : 'court-card waiting-card';
+        const badgeColor = isCourt ? 'var(--accent)' : 'var(--text-muted)';
+
+        const matchEl = document.createElement('div');
+        matchEl.className = cardClass;
+        matchEl.style.animationDelay = `${i * 0.1}s`;
+
+        // Calculate average level for display
+        const avgLevel = (group.reduce((acc, p) => acc + p.level, 0) / 4).toFixed(1);
+
+        matchEl.innerHTML = `
+            <div class="court-header">
+                <span class="court-title">${matchTitle}</span>
+                <span style="font-size: 0.8rem; color: var(--text-muted)">均等: ${avgLevel}</span>
+            </div>
+            <div class="match-vs">
+                <div class="team">
+                    <div class="team-player">${teamA[0].name} <span style="font-size:0.8em; opacity:0.7">(${teamA[0].level})</span></div>
+                    <div class="team-player">${teamA[1].name} <span style="font-size:0.8em; opacity:0.7">(${teamA[1].level})</span></div>
+                </div>
+                <div class="vs-badge" style="background: ${badgeColor}">VS</div>
+                <div class="team">
+                    <div class="team-player">${teamB[0].name} <span style="font-size:0.8em; opacity:0.7">(${teamB[0].level})</span></div>
+                    <div class="team-player">${teamB[1].name} <span style="font-size:0.8em; opacity:0.7">(${teamB[1].level})</span></div>
+                </div>
+            </div>
+        `;
+        matchContainer.appendChild(matchEl);
+    }
+
+    // Show waiting players (Leftovers who didn't make a full match)
+    const waitingPlayers = sortedPlayers.slice(totalMatches * 4);
+    if (waitingPlayers.length > 0) {
+        const waitingEl = document.createElement('div');
+        waitingEl.style.padding = '1rem';
+        waitingEl.style.color = 'var(--text-muted)';
+        waitingEl.style.textAlign = 'center';
+        waitingEl.style.background = 'rgba(0,0,0,0.2)';
+        waitingEl.style.borderRadius = '8px';
+        waitingEl.innerHTML = `<strong>輪空休息：</strong> ${waitingPlayers.map(p => `${p.name} (${p.level})`).join(', ')}`;
+        matchContainer.appendChild(waitingEl);
+    }
+}
+
+function saveToStorage() {
+    localStorage.setItem('badminton_players', JSON.stringify(players));
 }
 
 function loadFromStorage() {
