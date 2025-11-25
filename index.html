@@ -1,40 +1,91 @@
 <!DOCTYPE html>
 <html lang="zh-TW">
-  <head>
-    <meta charset="UTF-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>羽球計分板</title>
-    <script src="https://cdn.tailwindcss.com"></script>
-    <style>
-      @keyframes fade-in {
-        from { opacity: 0; transform: scale(0.95); }
-        to { opacity: 1; transform: scale(1); }
-      }
-      .animate-fade-in {
-        animation: fade-in 0.5s ease-out forwards;
-      }
-      /* For hiding scrollbars */
-      .scrollbar-hide::-webkit-scrollbar {
-        display: none;
-      }
-      .scrollbar-hide {
-        -ms-overflow-style: none;  /* IE and Edge */
-        scrollbar-width: none;  /* Firefox */
-      }
-    </style>
-  <script type="importmap">
-{
-  "imports": {
-    "react-dom/": "https://aistudiocdn.com/react-dom@^19.2.0/",
-    "react/": "https://aistudiocdn.com/react@^19.2.0/",
-    "react": "https://aistudiocdn.com/react@^19.2.0"
-  }
-}
-</script>
-<link rel="stylesheet" href="/index.css">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>羽球排點大師 | Badminton Matchmaker</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;600;800&family=Noto+Sans+TC:wght@400;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="style.css">
 </head>
-  <body class="bg-gray-900">
-    <div id="root"></div>
-    <script type="module" src="/index.tsx"></script>
-  </body>
+<body>
+    <div class="app-container">
+        <header class="main-header">
+            <div class="logo">
+                <span class="icon">🏸</span>
+                <h1>羽球排點大師</h1>
+            </div>
+            <p class="subtitle">智能分隊 • 實力均衡 • 快速開打</p>
+        </header>
+
+        <main class="dashboard">
+            <!-- Left Panel: Controls & Input -->
+            <section class="control-panel glass-panel">
+                <h2><span class="section-icon">📝</span> 選手管理</h2>
+                
+                <div class="input-group">
+                    <h3>單一新增</h3>
+                    <div class="manual-input">
+                        <input type="text" id="playerName" placeholder="姓名 (Name)">
+                        <input type="number" id="playerLevel" placeholder="等級 (1-10)" min="1" max="10">
+                        <button id="addPlayerBtn" class="btn primary-btn">新增選手</button>
+                    </div>
+                </div>
+
+                <div class="input-group">
+                    <h3>批量匯入</h3>
+                    <p class="hint">格式：姓名 等級 (例如：小明 8, 大華 6)</p>
+                    <textarea id="bulkInput" placeholder="在此貼上名單...&#10;小明 7&#10;小華 5&#10;John 8"></textarea>
+                    <button id="parseBtn" class="btn secondary-btn">解析並匯入</button>
+                </div>
+
+                <div class="input-group settings-group">
+                    <h3><span class="section-icon">⚙️</span> 比賽設定</h3>
+                    <div class="setting-item">
+                        <label for="courtCount">場地數量</label>
+                        <div class="number-control">
+                            <button class="control-btn" onclick="adjustCourt(-1)">-</button>
+                            <span id="courtCountDisplay">2</span>
+                            <button class="control-btn" onclick="adjustCourt(1)">+</button>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="action-area">
+                    <button id="generateBtn" class="btn action-btn">
+                        <span class="btn-icon">⚡</span> 產生對戰表
+                    </button>
+                    <button id="clearBtn" class="btn danger-btn">清空名單</button>
+                </div>
+            </section>
+
+            <!-- Right Panel: Lists & Results -->
+            <section class="display-panel">
+                <!-- Player List -->
+                <div class="player-list-container glass-panel">
+                    <div class="panel-header">
+                        <h2>選手列表 <span id="playerCount" class="badge">0</span></h2>
+                    </div>
+                    <div id="playerList" class="player-grid">
+                        <!-- Players will be added here -->
+                        <div class="empty-state">尚未加入選手</div>
+                    </div>
+                </div>
+
+                <!-- Match Results -->
+                <div class="match-results-container glass-panel">
+                    <div class="panel-header">
+                        <h2>對戰組合</h2>
+                    </div>
+                    <div id="matchContainer" class="match-grid">
+                        <div class="empty-state">點擊「產生對戰表」開始排點</div>
+                    </div>
+                </div>
+            </section>
+        </main>
+    </div>
+
+    <script src="script.js"></script>
+</body>
 </html>
